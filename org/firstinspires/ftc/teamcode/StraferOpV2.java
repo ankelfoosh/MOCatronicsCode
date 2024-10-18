@@ -140,8 +140,8 @@ public class StraferOpV2 extends LinearOpMode {
     double angularTurn = 1;
     
     while (getAngle() < togNum) {
-      Lf.setPower(0);
-      Rf.setPower(0);
+      Lf.setPower(-0.08 * angularTurn);
+      Rf.setPower(0.08 * angularTurn);
       Lb.setPower(angularTurn);
       Rb.setPower(-angularTurn);
     }
@@ -153,8 +153,8 @@ public class StraferOpV2 extends LinearOpMode {
     double angularTurn = 1;
     
     while (getAngle() > togNum) {
-      Lf.setPower(0.2 * angularTurn);
-      Rf.setPower(-0.2 * angularTurn);
+      Lf.setPower(0.08 * angularTurn);
+      Rf.setPower(-0.08 * angularTurn);
       Lb.setPower(-angularTurn);
       Rb.setPower(angularTurn);
     }
