@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 /*
- * This is strafer code
+ * This is strafer code, it needs to be updated.
  *
  */
 
