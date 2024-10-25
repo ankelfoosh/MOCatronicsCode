@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
-
+// This is the Autonomus for the BlueRight side
+//Hi
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
