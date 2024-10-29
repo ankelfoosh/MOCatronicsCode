@@ -13,6 +13,15 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.hardware.IMU;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+IMU.Parameters myIMUparameters;
+myIMUparameters = new IMU.Parameters(
+  new RevHubOrientationOnRobot (
+    RevHubOrientationOnRobot.LogoFacingDirection.FORWARD,
+    RevHubOrientationOnRobot.usbFacingDirection.DOWN,
+    )
+);
+
 @Autonomous(name = "RedRightAuto")
 public class RedRightAuto extends LinearOpMode {
   
