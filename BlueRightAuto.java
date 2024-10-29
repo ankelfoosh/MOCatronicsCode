@@ -124,20 +124,18 @@ public class BlueRightAuto extends LinearOpMode {
   Lf.setPower(-power * -1.2);
   Rb.setPower(-power * -1.2);
   Rf.setPower(-power * -1.2);
-  telemetry.addLine("yeeyaw");
+  telemetry.addLine("yeeyaw fast");
   telemetry.update();
   }  
-  if (yeeyaw > 90 * turns) {
     while (yeeyaw > 90 * turns) {
       yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
     Lb.setPower(power * -0.4);
     Lf.setPower(power * -0.4);
     Rb.setPower(power * -0.4);
     Rf.setPower(power * -0.4);
-    telemetry.addLine("yeeyaw");
+    telemetry.addLine("yeeyaw slow");
     telemetry.update();
    }
-  }
     Lb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     Lf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     Rb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -156,25 +154,23 @@ public class BlueRightAuto extends LinearOpMode {
       Lf.setPower(-power * 1.2);
       Rb.setPower(-power * 1.2);
       Rf.setPower(-power * 1.2);
-      telemetry.addLine("yeeyaw");
+      telemetry.addLine("yeeyaw fast");
       telemetry.update();
     }
-    if (yeeyaw < -90 * turns) {
       while (yeeyaw < -90 * turns) {
         yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
         Lb.setPower(power * 0.4);
         Lf.setPower(power * 0.4);
         Rb.setPower(power * 0.4);
         Rf.setPower(power * 0.4);
-        telemetry.addLine("yeeyaw");
+        telemetry.addLine("yeeyaw slow");
         telemetry.update();
       }
-    }
     Lb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     Lf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     Rb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     Rf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-  }
+      }
   
    @Override
   public void runOpMode() {
