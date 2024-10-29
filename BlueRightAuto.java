@@ -1,45 +1,30 @@
 package org.firstinspires.ftc.teamcode;
-
+// This is the Autonomus for the BlueRight side
+//Hi
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-IMU.Parameters myIMUparameters;
-myIMUparameters = new IMU.Parameters(
-  new RevHubOrientationOnRobot (
-    RevHubOrientationOnRobot.LogoFacingDirection.FORWARD,
-    RevHubOrientationOnRobot.usbFacingDirection.DOWN,
-    )
-);
+
 
 @Autonomous(name = "BlueRightAuto")
 public class BlueRightAuto extends LinearOpMode {
-
   
   private DcMotor Lf;
   private DcMotor Rf;
   private DcMotor Lb;
   private DcMotor Rb;
   private IMU imu;
-  private DcMotor pickMeUp;
-  private DcMotor rotat;
+  private 
   
-  private Servo imaTouchU;
-  private Servo ankel;
-  
-  double power = .3;
+  double power = .45;
   float yeeyaw;
 
     public void initialize() { 
@@ -75,7 +60,6 @@ public class BlueRightAuto extends LinearOpMode {
   }
 
 // Stops and resets the encoder value stored in the motor
-
 
 
   private void Left(int _targetPos) {
@@ -130,18 +114,20 @@ public class BlueRightAuto extends LinearOpMode {
   Lf.setPower(-power * -1.2);
   Rb.setPower(-power * -1.2);
   Rf.setPower(-power * -1.2);
-  telemetry.addLine("yeeyaw fast");
+  telemetry.addLine("yeeyaw");
   telemetry.update();
   }  
+  if (yeeyaw > 90 * turns) {
     while (yeeyaw > 90 * turns) {
       yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
     Lb.setPower(power * -0.4);
     Lf.setPower(power * -0.4);
     Rb.setPower(power * -0.4);
     Rf.setPower(power * -0.4);
-    telemetry.addLine("yeeyaw slow");
+    telemetry.addLine("yeeyaw");
     telemetry.update();
    }
+  }
     Lb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     Lf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     Rb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -149,6 +135,7 @@ public class BlueRightAuto extends LinearOpMode {
   }
   
     private void TurnRight(int turns) {
+    imu.resetYaw();
     yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
     Lb.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     Lf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -160,23 +147,25 @@ public class BlueRightAuto extends LinearOpMode {
       Lf.setPower(-power * 1.2);
       Rb.setPower(-power * 1.2);
       Rf.setPower(-power * 1.2);
-      telemetry.addLine("yeeyaw fast");
+      telemetry.addLine("yeeyaw");
       telemetry.update();
     }
+    if (yeeyaw < -90 * turns) {
       while (yeeyaw < -90 * turns) {
         yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
         Lb.setPower(power * 0.4);
         Lf.setPower(power * 0.4);
         Rb.setPower(power * 0.4);
         Rf.setPower(power * 0.4);
-        telemetry.addLine("yeeyaw slow");
+        telemetry.addLine("yeeyaw");
         telemetry.update();
       }
+    }
     Lb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     Lf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     Rb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     Rf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-      }
+  }
   
    @Override
   public void runOpMode() {
@@ -188,11 +177,6 @@ public class BlueRightAuto extends LinearOpMode {
     Rf = hardwareMap.get(DcMotor.class, "Rf");
     Lb = hardwareMap.get(DcMotor.class, "Lb");
     Lf = hardwareMap.get(DcMotor.class, "Lf");
-    
-    rotat = hardwareMap.get(DcMotor.class, "rotat");
-    imaTouchU = hardwareMap.get(Servo.class, "imaTouchU");
-    ankel = hardwareMap.get(Servo.class, "ankel");    
-    
     imu = hardwareMap.get(IMU.class, "imu");
     Lb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     Lf.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -202,15 +186,13 @@ public class BlueRightAuto extends LinearOpMode {
     Lf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     Rb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     Rf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    imu.resetYaw();    
 
     waitForStart();
 
 while (opModeIsActive()) {
     currentPos = 0;
     turnSpeed = 818;
-    TurnRight(1);
-    /* Forward(500);
+    Forward(500);
     Right(900);
     Forward(1700);
     TurnRight(1);
@@ -230,11 +212,7 @@ while (opModeIsActive()) {
     Forward(600);
     sleep(700);
     Right(1400);
-    Forward(-500);
-    TurnRight(1);
-    Forward(900);
-   Right(600);
-  */  break;
+    break;
     }
   }
 }
