@@ -1,13 +1,26 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.IMU;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.ServoController;
+import com.qualcomm.robotcore.hardware.IMU;
+
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+IMU.Parameters myIMUparameters;
+myIMUparameters = new IMU.Parameters(
+  new RevHubOrientationOnRobot (
+    RevHubOrientationOnRobot.LogoFacingDirection.FORWARD,
+    RevHubOrientationOnRobot.usbFacingDirection.DOWN,
+    )
+);
 
 @Autonomous(name = "RedRightAuto")
 public class RedRightAuto extends LinearOpMode {
@@ -77,7 +90,7 @@ public class RedRightAuto extends LinearOpMode {
   
   
   private void Right(int _targetPos) {
-  Lb.setTargetPosition(Lb.getCurrentPosition() + _targetPos);
+	Lb.setTargetPosition(Lb.getCurrentPosition() + _targetPos);
     Lf.setTargetPosition(Lf.getCurrentPosition() + -_targetPos);
     Rb.setTargetPosition(Rb.getCurrentPosition() + _targetPos);
     Rf.setTargetPosition(Rf.getCurrentPosition() + -_targetPos);
@@ -98,22 +111,22 @@ public class RedRightAuto extends LinearOpMode {
   private void TurnLeft(int turns) {
   imu.resetYaw();
   yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
-  Lb.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+	Lb.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     Lf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     Rb.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     Rf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
   while (yeeyaw < 90 * turns) {
     yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
-  Lb.setPower(-power * -1.2);
-  Lf.setPower(-power * -1.2);
-  Rb.setPower(-power * -1.2);
-  Rf.setPower(-power * -1.2);
-  telemetry.addLine("yeeyaw");
-  telemetry.update();
+	Lb.setPower(-power * -1.2);
+	Lf.setPower(-power * -1.2);
+	Rb.setPower(-power * -1.2);
+	Rf.setPower(-power * -1.2);
+	telemetry.addLine("yeeyaw");
+	telemetry.update();
   }  
   if (yeeyaw > 90 * turns) {
     while (yeeyaw > 90 * turns) {
-      yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
+   yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
     Lb.setPower(power * -0.4);
     Lf.setPower(power * -0.4);
     Rb.setPower(power * -0.4);
