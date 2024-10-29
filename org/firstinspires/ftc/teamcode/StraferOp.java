@@ -8,8 +8,8 @@ import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-@TeleOp(name = "StraferOpV3")
-public class StraferOpV3 extends LinearOpMode {
+@TeleOp(name = "StraferOp")
+public class StraferOp extends LinearOpMode {
 
   private DcMotor Lf;
   private DcMotor Rf;
@@ -18,13 +18,23 @@ public class StraferOpV3 extends LinearOpMode {
   private DcMotor pickMeUp;
   private DcMotor Llin;
   private DcMotor Rlin;
+  private DcMotor rotat;
+  
   private Servo imaTouchU;
+  private Servo ankel;
   
   private IMU imu;
   
   private double RobotSpeed = .42;
+  private double armSpeed = .2;
   private double TurnSpeed = 1.6;
   private boolean bigTurn = false;
+  
+  private int LRlinSetPos = 120;
+  private int pMUSetPos = 30;
+  private int rotatSetPos = 0;
+  
+  private boolean SAMSMode = false;
 
   /**
    * This function is executed when this Op Mode is selected from the Driver Station.
@@ -38,7 +48,10 @@ public class StraferOpV3 extends LinearOpMode {
     pickMeUp = hardwareMap.get(DcMotor.class, "pickmeup");
     Llin = hardwareMap.get(DcMotor.class, "Llin");
     Rlin = hardwareMap.get(DcMotor.class, "Rlin");
+    rotat = hardwareMap.get(DcMotor.class, "rotat");
+    
     imaTouchU = hardwareMap.get(Servo.class, "imaTouchU");
+    ankel = hardwareMap.get(Servo.class, "ankel");
     
     imu = hardwareMap.get(IMU.class, "imu");
     
@@ -49,6 +62,7 @@ public class StraferOpV3 extends LinearOpMode {
     pickMeUp.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     Llin.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     Rlin.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    rotat.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     
     Lf.setDirection(DcMotor.Direction.FORWARD);
     Rf.setDirection(DcMotor.Direction.REVERSE);
@@ -57,15 +71,24 @@ public class StraferOpV3 extends LinearOpMode {
     pickMeUp.setDirection(DcMotor.Direction.REVERSE);
     Llin.setDirection(DcMotor.Direction.REVERSE);
     Rlin.setDirection(DcMotor.Direction.FORWARD);
+    rotat.setDirection(DcMotor.Direction.FORWARD);
     
     //pickMeUp.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     //Llin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     //Rlin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    //rotat.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    
     pickMeUp.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     Llin.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     Rlin.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    rotat.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     
     imaTouchU.scaleRange(.2, .8);
+    ankel.scaleRange(0, 1);
+    
+    liftSystem(LRlinSetPos);
+    extendoGrip(pMUSetPos);
+    armRotation(rotatSetPos);
     
     waitForStart();
     while (opModeIsActive()) {
@@ -95,31 +118,90 @@ public class StraferOpV3 extends LinearOpMode {
         TurnSpeed = 1.6;
       }
       
-      if (gamepad2.right_trigger > 0.1){
-        liftSystem(7400);
-        Llin.setPower(1);
-        Rlin.setPower(1);
-      } else if (gamepad2.left_trigger > 0.1){
-        liftSystem(0);
-        Llin.setPower(1);
-        Rlin.setPower(1);
-      } else {
-        Llin.setPower(0);
-        Rlin.setPower(0);
+      if (gamepad2.dpad_right){
+        SAMSMode = true;
+      } else if (gamepad2.dpad_left){
+        SAMSMode = false;
       }
       
-      if (gamepad2.right_bumper){
-        //pickMeUp.setPower(.3);
-        extendoGrip(1020);
-      } else if (gamepad2.left_bumper){
-        //pickMeUp.setPower(-.1);
-        extendoGrip(30);
-      }
+      // This is the Supreme Arm Movement System (SAMS)
+      // This chunk of a block is near full-automatic arm movement
+      if (SAMSMode){
+        if (gamepad2.right_trigger > 0.1){
+          liftSystem(7100);
+          Llin.setPower(1);
+          Rlin.setPower(1);
+        } else if (gamepad2.left_trigger > 0.1){
+          liftSystem(120);
+          Llin.setPower(1);
+          Rlin.setPower(1);
+        } else {
+          Llin.setPower(0);
+          Rlin.setPower(0);
+        }
+        
+        if (Llin.getCurrentPosition() >= 2400){
+          armRotation(1140);
+          ankel.setPosition(.62);
+        } else {
+          armRotation(0);
+          ankel.setPosition(.567);
+        }
+        
+        if (Llin.getCurrentPosition() <= 820){
+          extendoGrip(1020);
+        } else {
+          extendoGrip(30);
+        }
+        
+        if (gamepad2.x){
+          imaTouchU.setPosition(.16);
+        } else if (gamepad2.b){
+          imaTouchU.setPosition(.5);
+        }
+      } else if (!SAMSMode){
+        if (gamepad2.right_trigger > 0.1){
+          liftSystem(7100);
+          Llin.setPower(1);
+          Rlin.setPower(1);
+        } else if (gamepad2.left_trigger > 0.1){
+          liftSystem(120);
+          Llin.setPower(1);
+          Rlin.setPower(1);
+        } else {
+          Llin.setPower(0);
+          Rlin.setPower(0);
+        }
       
-      if (gamepad2.x){
-        imaTouchU.setPosition(.16);
-      } else if (gamepad2.b){
-        imaTouchU.setPosition(.5);
+        if (gamepad2.right_bumper){
+          //pickMeUp.setPower(.3);
+          extendoGrip(1020);
+        } else if (gamepad2.left_bumper){
+          //pickMeUp.setPower(-.1);
+          extendoGrip(30);
+        }
+      
+        if (gamepad2.x){
+          imaTouchU.setPosition(.16);
+        } else if (gamepad2.b){
+          imaTouchU.setPosition(.5);
+        }
+        
+        if (gamepad2.a){
+          ankel.setPosition(.567);
+        } else if (gamepad2.y){
+          ankel.setPosition(.62);
+        }
+        
+        if (gamepad2.dpad_up){
+          armRotation(1140);
+          //rotat.setPower(armSpeed);
+        } else if (gamepad2.dpad_down){
+          armRotation(0);
+          //rotat.setPower(armSpeed);
+        } else {
+          
+        }
       }
       
       if (gamepad1.a){
@@ -152,6 +234,12 @@ public class StraferOpV3 extends LinearOpMode {
     pickMeUp.setTargetPosition(pos);
     pickMeUp.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     pickMeUp.setPower(1);
+  }
+  
+  public void armRotation(int pos) {
+    rotat.setTargetPosition(pos);
+    rotat.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    rotat.setPower(.6);
   }
   
   public void liftSystem(int pos){
