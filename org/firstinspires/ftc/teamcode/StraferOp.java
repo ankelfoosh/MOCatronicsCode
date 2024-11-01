@@ -8,8 +8,8 @@ import com.qualcomm.robotcore.hardware.ServoController;
 import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-@TeleOp(name = "StraferOp")
-public class StraferOp extends LinearOpMode {
+@TeleOp(name = "StraferOpV3")
+public class StraferOpV3 extends LinearOpMode {
 
   private DcMotor Lf;
   private DcMotor Rf;
@@ -26,13 +26,13 @@ public class StraferOp extends LinearOpMode {
   private IMU imu;
   
   private double RobotSpeed = .42;
-  private double armSpeed = .2;
+  private double armSpeed = .6;
   private double TurnSpeed = 1.6;
   private boolean bigTurn = false;
   
-  private int LRlinSetPos = 120;
+  private int LRlinSetPos = 160;
   private int pMUSetPos = 30;
-  private int rotatSetPos = 0;
+  private int rotatSetPos = 70;
   
   private boolean SAMSMode = false;
 
@@ -74,8 +74,8 @@ public class StraferOp extends LinearOpMode {
     rotat.setDirection(DcMotor.Direction.FORWARD);
     
     //pickMeUp.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    //Llin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    //Rlin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    Llin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    Rlin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     //rotat.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     
     pickMeUp.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -128,11 +128,11 @@ public class StraferOp extends LinearOpMode {
       // This chunk of a block is near full-automatic arm movement
       if (SAMSMode){
         if (gamepad2.right_trigger > 0.1){
-          liftSystem(7100);
+          liftSystem(7000);
           Llin.setPower(1);
           Rlin.setPower(1);
         } else if (gamepad2.left_trigger > 0.1){
-          liftSystem(120);
+          liftSystem(LRlinSetPos);
           Llin.setPower(1);
           Rlin.setPower(1);
         } else {
@@ -140,18 +140,24 @@ public class StraferOp extends LinearOpMode {
           Rlin.setPower(0);
         }
         
-        if (Llin.getCurrentPosition() >= 2400){
-          armRotation(1140);
-          ankel.setPosition(.62);
-        } else {
-          armRotation(0);
+        if (Llin.getCurrentPosition() >= 1200 && !gamepad2.dpad_up && !gamepad2.dpad_down){
+          armRotation(1100);
+          ankel.setPosition(.584);
+        } else if (!gamepad2.dpad_up && !gamepad2.dpad_down){
+          armRotation(rotatSetPos);
           ankel.setPosition(.567);
+        } else if (gamepad2.dpad_up){
+          armRotation(800);
+          ankel.setPosition(.6);
+        } else if (gamepad2.dpad_down){
+          armRotation(300);
+          ankel.setPosition(.618);
         }
         
-        if (Llin.getCurrentPosition() <= 820){
+        if (Llin.getCurrentPosition() <= 820 && !gamepad2.dpad_up){
           extendoGrip(1020);
         } else {
-          extendoGrip(30);
+          extendoGrip(pMUSetPos);
         }
         
         if (gamepad2.x){
@@ -165,7 +171,7 @@ public class StraferOp extends LinearOpMode {
           Llin.setPower(1);
           Rlin.setPower(1);
         } else if (gamepad2.left_trigger > 0.1){
-          liftSystem(120);
+          liftSystem(LRlinSetPos);
           Llin.setPower(1);
           Rlin.setPower(1);
         } else {
@@ -178,7 +184,7 @@ public class StraferOp extends LinearOpMode {
           extendoGrip(1020);
         } else if (gamepad2.left_bumper){
           //pickMeUp.setPower(-.1);
-          extendoGrip(30);
+          extendoGrip(pMUSetPos);
         }
       
         if (gamepad2.x){
@@ -190,17 +196,17 @@ public class StraferOp extends LinearOpMode {
         if (gamepad2.a){
           ankel.setPosition(.567);
         } else if (gamepad2.y){
-          ankel.setPosition(.62);
+          ankel.setPosition(.592);
         }
         
         if (gamepad2.dpad_up){
-          armRotation(1140);
-          //rotat.setPower(armSpeed);
+          armRotationMove(1000);
+          rotat.setPower(armSpeed);
         } else if (gamepad2.dpad_down){
-          armRotation(0);
-          //rotat.setPower(armSpeed);
+          armRotationMove(rotatSetPos);
+          rotat.setPower(armSpeed);
         } else {
-          
+          rotat.setPower(0);
         }
       }
       
@@ -240,6 +246,11 @@ public class StraferOp extends LinearOpMode {
     rotat.setTargetPosition(pos);
     rotat.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     rotat.setPower(.6);
+  }
+  
+  public void armRotationMove(int pos) {
+    rotat.setTargetPosition(pos);
+    rotat.setMode(DcMotor.RunMode.RUN_TO_POSITION);
   }
   
   public void liftSystem(int pos){
