@@ -29,6 +29,7 @@ public class StraferOpV3 extends LinearOpMode {
   private double armSpeed = .6;
   private double TurnSpeed = 1.6;
   private boolean bigTurn = false;
+  private boolean armMovement = false;
   
   private int LRlinSetPos = 160;
   private int pMUSetPos = 30;
@@ -127,43 +128,80 @@ public class StraferOpV3 extends LinearOpMode {
       // This is the Supreme Arm Movement System (SAMS)
       // This chunk of a block is near full-automatic arm movement
       if (SAMSMode){
-        if (gamepad2.right_trigger > 0.1){
-          liftSystem(7000);
-          Llin.setPower(1);
-          Rlin.setPower(1);
-        } else if (gamepad2.left_trigger > 0.1){
+        if (gamepad2.dpad_down){
           liftSystem(LRlinSetPos);
           Llin.setPower(1);
           Rlin.setPower(1);
-        } else {
-          Llin.setPower(0);
-          Rlin.setPower(0);
-        }
-        
-        if (Llin.getCurrentPosition() >= 1200 && !gamepad2.dpad_up && !gamepad2.dpad_down){
-          armRotation(1100);
-          ankel.setPosition(.584);
-        } else if (!gamepad2.dpad_up && !gamepad2.dpad_down){
           armRotation(rotatSetPos);
+          extendoGrip(pMUSetPos);
           ankel.setPosition(.567);
+          imaTouchU.setPosition(.5);
+          armMovement = false;
+        } else if (gamepad2.dpad_right){
+          armRotation(rotatSetPos);
+          extendoGrip(pMUSetPos);
+          ankel.setPosition(.567);
+          armMovement = true;
         } else if (gamepad2.dpad_up){
           armRotation(800);
           ankel.setPosition(.6);
-        } else if (gamepad2.dpad_down){
+          armMovement = true;
+        } else if (gamepad2.dpad_left){
           armRotation(300);
           ankel.setPosition(.618);
+          armMovement = true;
+        } else {
+          imaTouchU.setPosition(.16);
+          liftSystem(800);
+          Llin.setPower(1);
+          Rlin.setPower(1);
+          armRotation(rotatSetPos);
+          extendoGrip(pMUSetPos);
+          ankel.setPosition(.567);
+          armMovement = false;
+        }
+
+        if (armMovement){
+          if (gamepad2.right_trigger > 0.1){
+            liftSystem(7000);
+            Llin.setPower(1);
+            Rlin.setPower(1);
+          } else if (gamepad2.left_trigger > 0.1){
+            liftSystem(LRlinSetPos);
+            Llin.setPower(1);
+            Rlin.setPower(1);
+          } else {
+            Llin.setPower(0);
+            Rlin.setPower(0);
+          }
         }
         
-        if (Llin.getCurrentPosition() <= 820 && !gamepad2.dpad_up){
+        // if (Llin.getCurrentPosition() >= 1200 && !gamepad2.dpad_up && !gamepad2.dpad_down){
+        //   armRotation(1100);
+        //   ankel.setPosition(.584);
+        // } else if (!gamepad2.dpad_up && !gamepad2.dpad_down){
+        //   armRotation(rotatSetPos);
+        //   ankel.setPosition(.567);
+        // } else if (gamepad2.dpad_up){
+        //   armRotation(800);
+        //   ankel.setPosition(.6);
+        // } else if (gamepad2.dpad_down){
+        //   armRotation(300);
+        //   ankel.setPosition(.618);
+        // }
+        
+        if (gamepad2.dpad_up && gamepad.dpad_left){
           extendoGrip(1020);
         } else {
           extendoGrip(pMUSetPos);
         }
-        
-        if (gamepad2.x){
-          imaTouchU.setPosition(.16);
-        } else if (gamepad2.b){
-          imaTouchU.setPosition(.5);
+
+        if (armMovement){
+          if (gamepad2.x){
+            imaTouchU.setPosition(.16);
+          } else if (gamepad2.b){
+            imaTouchU.setPosition(.5);
+          }
         }
       } else if (!SAMSMode){
         if (gamepad2.right_trigger > 0.1){
