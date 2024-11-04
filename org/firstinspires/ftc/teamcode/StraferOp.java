@@ -24,18 +24,23 @@ public class StraferOpV3 extends LinearOpMode {
   private Servo ankel;
   
   private IMU imu;
+  private ElapsedTime timeElapsed = new ElapsedTime();
+  private double curTime = 0;
+  private double nextTime = 0;
   
   private double RobotSpeed = .42;
   private double armSpeed = .6;
   private double TurnSpeed = 1.6;
   private boolean bigTurn = false;
   private boolean armMovement = false;
+
+  private boolean inSetPos = true;
   
   private int LRlinSetPos = 160;
   private int pMUSetPos = 30;
   private int rotatSetPos = 70;
   
-  private boolean SAMSMode = false;
+  private boolean SAMSMode = true;
 
   /**
    * This function is executed when this Op Mode is selected from the Driver Station.
@@ -119,14 +124,15 @@ public class StraferOpV3 extends LinearOpMode {
         TurnSpeed = 1.6;
       }
       
-      if (gamepad2.dpad_right){
+      if (gamepad2.right_stick){
         SAMSMode = true;
-      } else if (gamepad2.dpad_left){
+      } else if (gamepad2.left_stick){
         SAMSMode = false;
       }
       
       // This is the Supreme Arm Movement System (SAMS)
       // This chunk of a block is near full-automatic arm movement
+      // also prepare for a lot of nesting
       if (SAMSMode){
         if (gamepad2.dpad_down){
           liftSystem(LRlinSetPos);
@@ -137,30 +143,44 @@ public class StraferOpV3 extends LinearOpMode {
           ankel.setPosition(.567);
           imaTouchU.setPosition(.5);
           armMovement = false;
+          inSetPos = false
         } else if (gamepad2.dpad_right){
           armRotation(rotatSetPos);
           extendoGrip(pMUSetPos);
           ankel.setPosition(.567);
           armMovement = true;
+          inSetPos = false
         } else if (gamepad2.dpad_up){
           armRotation(800);
           ankel.setPosition(.6);
           armMovement = true;
+          inSetPos = false;
         } else if (gamepad2.dpad_left){
           armRotation(300);
           ankel.setPosition(.618);
           armMovement = true;
+          inSetPos = false;
         } else {
-          imaTouchU.setPosition(.16);
-          liftSystem(800);
-          Llin.setPower(1);
-          Rlin.setPower(1);
-          armRotation(rotatSetPos);
-          extendoGrip(pMUSetPos);
-          ankel.setPosition(.567);
-          armMovement = false;
+          if (curTime >= nextTime){
+            liftSystem(800);
+            Llin.setPower(1);
+            Rlin.setPower(1);
+            armRotation(rotatSetPos);
+            extendoGrip(pMUSetPos);
+            ankel.setPosition(.567);
+            armMovement = false;
+          } else {
+            curTime = timeElapsed.now(TimeUnit.SECONDS);
+
+            if (!inSetPos){
+              nextTime = curTime + 0.4;
+              imaTouchU.setPosition(.16);
+              inSetPos = true;
+            }
+          }
         }
 
+        // SO MUCH NESTING I HATE IT
         if (armMovement){
           if (gamepad2.right_trigger > 0.1){
             liftSystem(7000);
@@ -174,7 +194,23 @@ public class StraferOpV3 extends LinearOpMode {
             Llin.setPower(0);
             Rlin.setPower(0);
           }
+          
+          if (gamepad2.x){
+            imaTouchU.setPosition(.16);
+          } else if (gamepad2.b){
+            imaTouchU.setPosition(.5);
+          }
+
+          if (!gamepad2.dpad_right){
+            if (gamepad2.right_bumper){
+              extendoGrip(1020);
+            } else {
+              extendoGrip(pMUSetPos);
+            }
+          }
         }
+        
+        
         
         // if (Llin.getCurrentPosition() >= 1200 && !gamepad2.dpad_up && !gamepad2.dpad_down){
         //   armRotation(1100);
@@ -189,20 +225,6 @@ public class StraferOpV3 extends LinearOpMode {
         //   armRotation(300);
         //   ankel.setPosition(.618);
         // }
-        
-        if (gamepad2.dpad_up && gamepad.dpad_left){
-          extendoGrip(1020);
-        } else {
-          extendoGrip(pMUSetPos);
-        }
-
-        if (armMovement){
-          if (gamepad2.x){
-            imaTouchU.setPosition(.16);
-          } else if (gamepad2.b){
-            imaTouchU.setPosition(.5);
-          }
-        }
       } else if (!SAMSMode){
         if (gamepad2.right_trigger > 0.1){
           liftSystem(7100);
