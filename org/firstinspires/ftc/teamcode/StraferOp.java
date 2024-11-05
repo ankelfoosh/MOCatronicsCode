@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.TouchSensor;
+import java.util.concurrent.TimeUnit;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -23,6 +26,9 @@ public class StraferOpV3 extends LinearOpMode {
   private Servo imaTouchU;
   private Servo ankel;
   
+  private TouchSensor toeA;
+  private TouchSensor toeB;
+  
   private IMU imu;
   private ElapsedTime timeElapsed = new ElapsedTime();
   private double curTime = 0;
@@ -35,10 +41,11 @@ public class StraferOpV3 extends LinearOpMode {
   private boolean armMovement = false;
 
   private boolean inSetPos = true;
+  private boolean limitReached = false;
   
   private int LRlinSetPos = 160;
   private int pMUSetPos = 30;
-  private int rotatSetPos = 70;
+  private int rotatSetPos = 240;
   
   private boolean SAMSMode = true;
 
@@ -58,6 +65,9 @@ public class StraferOpV3 extends LinearOpMode {
     
     imaTouchU = hardwareMap.get(Servo.class, "imaTouchU");
     ankel = hardwareMap.get(Servo.class, "ankel");
+    
+    toeA = hardwareMap.get(TouchSensor.class, "toe1");
+    toeB = hardwareMap.get(TouchSensor.class, "toe3");
     
     imu = hardwareMap.get(IMU.class, "imu");
     
@@ -124,9 +134,17 @@ public class StraferOpV3 extends LinearOpMode {
         TurnSpeed = 1.6;
       }
       
-      if (gamepad2.right_stick){
+      if ((toeA.isPressed() || toeB.isPressed()) && limitReached){
+        Llin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Rlin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        limitReached = false;
+      } else if (!(toeA.isPressed() || toeB.isPressed()) && !limitReached){
+        limitReached = true;
+      }
+      
+      if (gamepad2.right_stick_button){
         SAMSMode = true;
-      } else if (gamepad2.left_stick){
+      } else if (gamepad2.left_stick_button){
         SAMSMode = false;
       }
       
@@ -139,17 +157,16 @@ public class StraferOpV3 extends LinearOpMode {
           Llin.setPower(1);
           Rlin.setPower(1);
           armRotation(rotatSetPos);
-          extendoGrip(pMUSetPos);
+          extendoGrip(960);
           ankel.setPosition(.567);
-          imaTouchU.setPosition(.5);
           armMovement = false;
-          inSetPos = false
+          inSetPos = false;
         } else if (gamepad2.dpad_right){
-          armRotation(rotatSetPos);
+          armRotation(1550);
           extendoGrip(pMUSetPos);
           ankel.setPosition(.567);
           armMovement = true;
-          inSetPos = false
+          inSetPos = false;
         } else if (gamepad2.dpad_up){
           armRotation(800);
           ankel.setPosition(.6);
@@ -160,24 +177,15 @@ public class StraferOpV3 extends LinearOpMode {
           ankel.setPosition(.618);
           armMovement = true;
           inSetPos = false;
-        } else {
-          if (curTime >= nextTime){
-            liftSystem(800);
-            Llin.setPower(1);
-            Rlin.setPower(1);
-            armRotation(rotatSetPos);
-            extendoGrip(pMUSetPos);
-            ankel.setPosition(.567);
-            armMovement = false;
-          } else {
-            curTime = timeElapsed.now(TimeUnit.SECONDS);
-
-            if (!inSetPos){
-              nextTime = curTime + 0.4;
-              imaTouchU.setPosition(.16);
-              inSetPos = true;
-            }
-          }
+        } else if (gamepad2.y){
+          liftSystem(800);
+          Llin.setPower(1);
+          Rlin.setPower(1);
+          armRotation(rotatSetPos);
+          extendoGrip(pMUSetPos);
+          ankel.setPosition(.567);
+          armMovement = false;
+          inSetPos = true;
         }
 
         // SO MUCH NESTING I HATE IT
@@ -194,20 +202,20 @@ public class StraferOpV3 extends LinearOpMode {
             Llin.setPower(0);
             Rlin.setPower(0);
           }
-          
-          if (gamepad2.x){
-            imaTouchU.setPosition(.16);
-          } else if (gamepad2.b){
-            imaTouchU.setPosition(.5);
-          }
 
           if (!gamepad2.dpad_right){
             if (gamepad2.right_bumper){
-              extendoGrip(1020);
+              extendoGrip(960);
             } else {
               extendoGrip(pMUSetPos);
             }
           }
+        }
+        
+        if (gamepad2.x){
+          imaTouchU.setPosition(.21);
+        } else if (gamepad2.b){
+          imaTouchU.setPosition(.55);
         }
         
         
