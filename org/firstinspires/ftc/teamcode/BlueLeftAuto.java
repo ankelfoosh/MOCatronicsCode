@@ -1,7 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -9,16 +12,13 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.ServoController;
-import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.IMU;
 
 
-
-@Autonomous(name = "BlueLeftAuto")
-public class BlueLeftAuto extends LinearOpMode {
+@Autonomous(name = "BlueLeftAuto", preselectTeleOp = "StraferOpV3")
+public class BlueLeftAuto extends LinearOpMode { 
   
   private DcMotor Lf;
   private DcMotor Rf;
@@ -29,10 +29,13 @@ public class BlueLeftAuto extends LinearOpMode {
   private DcMotor Rlin;
   private DcMotor rotat;
   private IMU imu;
+  private DistanceSensor Sensor;
   
   private Servo imaTouchU;
   private Servo ankel;
   
+  double IMUpower = .5;
+  double armSpeed = 1;
   double power = .4;
   float yeeyaw;
   
@@ -105,7 +108,7 @@ public class BlueLeftAuto extends LinearOpMode {
     Rb.setPower(power);
     Rf.setPower(power);
     while (Lb.isBusy()) {
-    telemetry.addData("LbCurrentPosition",Lb.getTargetPosition());
+    telemetry.addData("RbCurrentPosition",Rb.getTargetPosition());
     telemetry.update();
     }
   }
@@ -124,7 +127,7 @@ public class BlueLeftAuto extends LinearOpMode {
     Rb.setPower(power);
     Rf.setPower(power);
     while (Lb.isBusy()) {
-      telemetry.addData("LbCurrentPosition",Lb.getTargetPosition());
+      telemetry.addData("RbCurrentPosition",Rb.getTargetPosition());
       telemetry.update();
     }
   }
@@ -143,7 +146,7 @@ public class BlueLeftAuto extends LinearOpMode {
     Rb.setPower(power);
     Rf.setPower(power);
     while (Lb.isBusy()) {
-      telemetry.addData("LbCurrentPosition",Lb.getTargetPosition());
+      telemetry.addData("RbCurrentPosition",Rb.getTargetPosition());
       telemetry.update();
     }
   }
@@ -167,7 +170,7 @@ public class BlueLeftAuto extends LinearOpMode {
   private void ArmUp(int _targetPos) {
     rotat.setTargetPosition(rotat.getCurrentPosition() + _targetPos);
     rotat.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    rotat.setPower(power);
+    rotat.setPower(armSpeed);
     while (rotat.isBusy()) {
     }
   }
@@ -175,9 +178,21 @@ public class BlueLeftAuto extends LinearOpMode {
   private void ArmDown(int _targetPos) {
     rotat.setTargetPosition(rotat.getCurrentPosition() - _targetPos);
     rotat.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    rotat.setPower(power);
+    rotat.setPower(armSpeed);
     while (rotat.isBusy()) {
     }
+  }
+  
+  private void SimulArmUp(int _targetPos) {
+    rotat.setTargetPosition(rotat.getCurrentPosition() + _targetPos);
+    rotat.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    rotat.setPower(armSpeed);
+  }
+  
+  private void SimulArmDown(int _targetPos) {
+    rotat.setTargetPosition(rotat.getCurrentPosition() - _targetPos);
+    rotat.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    rotat.setPower(armSpeed);
   }
   
   private void SlidesUp(int _targetPos) {
@@ -185,8 +200,8 @@ public class BlueLeftAuto extends LinearOpMode {
     Rlin.setTargetPosition(Rlin.getCurrentPosition() + _targetPos);
     Llin.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     Rlin.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    Llin.setPower(power);
-    Rlin.setPower(power);
+    Llin.setPower(armSpeed);
+    Rlin.setPower(armSpeed);
     while (Llin.isBusy()) {
     }
   }
@@ -196,10 +211,28 @@ public class BlueLeftAuto extends LinearOpMode {
     Rlin.setTargetPosition(Rlin.getCurrentPosition() - _targetPos);
     Llin.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     Rlin.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    Llin.setPower(power);
-    Rlin.setPower(power);
+    Llin.setPower(armSpeed);
+    Rlin.setPower(armSpeed);
     while (Llin.isBusy()) {
     }
+  }
+  
+  private void SimulSlidesUp(int _targetPos) {
+    Llin.setTargetPosition(Llin.getCurrentPosition() - _targetPos);
+    Rlin.setTargetPosition(Rlin.getCurrentPosition() + _targetPos);
+    Llin.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    Rlin.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    Llin.setPower(armSpeed);
+    Rlin.setPower(armSpeed);
+  }
+  
+  private void SimulSlidesDown(int _targetPos) {
+    Llin.setTargetPosition(Llin.getCurrentPosition() + _targetPos);
+    Rlin.setTargetPosition(Rlin.getCurrentPosition() - _targetPos);
+    Llin.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    Rlin.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    Llin.setPower(armSpeed);
+    Rlin.setPower(armSpeed);
   }
   
   private void CloseClaw() {
@@ -209,6 +242,11 @@ public class BlueLeftAuto extends LinearOpMode {
     
   private void OpenClaw() {
     imaTouchU.setPosition(0.5);
+    sleep(500);
+  }
+  
+  private void OpenClaw2() {
+    imaTouchU.setPosition(0.6);
     sleep(500);
   }
   
@@ -222,7 +260,8 @@ public class BlueLeftAuto extends LinearOpMode {
     sleep(500);
   }
   
-  /* private void TurnLeft(int turns) {
+  
+   private void TurnLeft(int turns) {
   imu.resetYaw();
   yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
   Lb.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -231,20 +270,20 @@ public class BlueLeftAuto extends LinearOpMode {
     Rf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
   while (yeeyaw < 90 * turns) {
     yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
-  Lb.setPower(-power * -1.2);
-  Lf.setPower(-power * -1.2);
-  Rb.setPower(-power * -1.2);
-  Rf.setPower(-power * -1.2);
+  Lb.setPower(-IMUpower * -1);
+  Lf.setPower(-IMUpower * -1);
+  Rb.setPower(-IMUpower * -1);
+  Rf.setPower(-IMUpower * -1);
   telemetry.addLine("fast turn");
   telemetry.update();
   }  
   if (yeeyaw > 90 * turns) {
     while (yeeyaw > 90 * turns) {
       yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
-    Lb.setPower(power * -0.4);
-    Lf.setPower(power * -0.4);
-    Rb.setPower(power * -0.4);
-    Rf.setPower(power * -0.4);
+    Lb.setPower(IMUpower * -0.4);
+    Lf.setPower(IMUpower * -0.4);
+    Rb.setPower(IMUpower * -0.4);
+    Rf.setPower(IMUpower * -0.4);
     telemetry.addLine("slow turn");
     telemetry.update();
    }
@@ -253,9 +292,9 @@ public class BlueLeftAuto extends LinearOpMode {
     Lf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     Rb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     Rf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-  } */
+  } 
   
-  /* private void TurnRight(int turns) {
+   private void TurnRight(int turns) {
     imu.resetYaw();
     yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
     Lb.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -264,20 +303,20 @@ public class BlueLeftAuto extends LinearOpMode {
     Rf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     while (yeeyaw > -90 * turns) {
       yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
-      Lb.setPower(-power * 1.2);
-      Lf.setPower(-power * 1.2);
-      Rb.setPower(-power * 1.2);
-      Rf.setPower(-power * 1.2);
+      Lb.setPower(-IMUpower * 1.2);
+      Lf.setPower(-IMUpower * 1.2);
+      Rb.setPower(-IMUpower * 1.2);
+      Rf.setPower(-IMUpower * 1.2);
       telemetry.addLine("fast turn");
       telemetry.update();
     }
     if (yeeyaw < -90 * turns) {
       while (yeeyaw < -90 * turns) {
         yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
-        Lb.setPower(power * 0.4);
-        Lf.setPower(power * 0.4);
-        Rb.setPower(power * 0.4);
-        Rf.setPower(power * 0.4);
+        Lb.setPower(IMUpower * 0.4);
+        Lf.setPower(IMUpower * 0.4);
+        Rb.setPower(IMUpower * 0.4);
+        Rf.setPower(IMUpower * 0.4);
         telemetry.addLine("slow turn");
         telemetry.update();
       }
@@ -286,13 +325,16 @@ public class BlueLeftAuto extends LinearOpMode {
     Lf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     Rb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     Rf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-  } */
+  } 
   
    @Override
   public void runOpMode() {
-  
     int turnSpeed;
     int currentPos;
+    int minRange;
+    int maxRange;
+    int armSpeed;
+
  /* IMU.Parameters myIMUparameters;
   myIMUparameters parameters = new IMU.Parameters(
   new RevHubOrientationOnRobot (
@@ -316,6 +358,8 @@ public class BlueLeftAuto extends LinearOpMode {
     imaTouchU = hardwareMap.get(Servo.class, "imaTouchU");
     ankel = hardwareMap.get(Servo.class, "ankel");
     
+    Sensor = hardwareMap.get(DistanceSensor.class, "Sensor");
+    
     imu = hardwareMap.get(IMU.class, "imu");
     
     Lb.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -333,6 +377,15 @@ public class BlueLeftAuto extends LinearOpMode {
     Llin.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     Rlin.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     rotat.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    
+    currentPos = 0;
+    turnSpeed = 818;
+    minRange = 10;
+    maxRange = 20;
+    imaTouchU.scaleRange(.2, .8);
+    ankel.scaleRange(0, 1);
+    telemetry.addData("Sensor", Sensor.getDeviceName() );
+    telemetry.update();
      
     
 //    imu.initialize(parameters);
@@ -340,37 +393,26 @@ public class BlueLeftAuto extends LinearOpMode {
     waitForStart();
 
 while (opModeIsActive()) {
-    currentPos = 0;
-    turnSpeed = 818;
-    imaTouchU.scaleRange(.2, .8);
-    ankel.scaleRange(0, 1);
+    telemetry.addData("Distance (cm)", Sensor.getDistance(DistanceUnit.CM));
+    telemetry.update();
     CloseClaw();
-    Forward(800);
-    sleep(350);
-    TurnLeftC(800);
-    sleep(100);
-    Forward(700);
-    sleep(100);
-    TurnLeftC(300);
-    sleep(100);
-    Forward(800);
-    sleep(150);
-    power = .6;
-    SlidesUp(5600);
-    ArmUp(1200);
+    SimulArmUp(1250);
+    SlidesUp(4400);
+    SimulSlidesUp(2200);
+    Forward(980);
     ClawUp();
-    ArmOut(1100);
     OpenClaw();
-    sleep(150);
-    ArmIn(1000);
-    SlidesDown(4500); 
-    power = .3;
-    TurnRightC(200);
-    sleep(100);
     Forward(-500);
-    Right(2200);
-    Forward(-800);
-    break;
+    TurnRight(1);
+    Left(250);
+    ArmDown(1200);
+    SlidesDown(6000);
+    Forward(600);
+    if (Sensor.getDistance(DistanceUnit.CM) > minRange && Sensor.getDistance(DistanceUnit.CM) < maxRange) {
+      ArmOut(1000);
+       break;
+    } 
+      break;
     }
   }
 }
