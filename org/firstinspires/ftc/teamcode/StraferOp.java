@@ -41,11 +41,13 @@ public class StraferOpV3 extends LinearOpMode {
   private boolean armMovement = false;
 
   private boolean inSetPos = true;
+  private boolean pickUpPos = false;
+  private boolean barPos = false;
   private boolean limitReached = false;
   
-  private int LRlinSetPos = 160;
+  private int LRlinSetPos = 80;
   private int pMUSetPos = 30;
-  private int rotatSetPos = 240;
+  private int rotatSetPos = 100;
   
   private boolean SAMSMode = true;
 
@@ -90,8 +92,8 @@ public class StraferOpV3 extends LinearOpMode {
     rotat.setDirection(DcMotor.Direction.FORWARD);
     
     //pickMeUp.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    Llin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-    Rlin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    //Llin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    //Rlin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     //rotat.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     
     pickMeUp.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -102,9 +104,14 @@ public class StraferOpV3 extends LinearOpMode {
     imaTouchU.scaleRange(.2, .8);
     ankel.scaleRange(0, 1);
     
-    liftSystem(LRlinSetPos);
-    extendoGrip(pMUSetPos);
+    liftSystem(800);
+    Llin.setPower(1);
+    Rlin.setPower(1);
     armRotation(rotatSetPos);
+    extendoGrip(pMUSetPos);
+    ankel.setPosition(.567);
+    armMovement = false;
+    inSetPos = true;
     
     waitForStart();
     while (opModeIsActive()) {
@@ -134,13 +141,13 @@ public class StraferOpV3 extends LinearOpMode {
         TurnSpeed = 1.6;
       }
       
-      if ((toeA.isPressed() || toeB.isPressed()) && limitReached){
-        Llin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Rlin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        limitReached = false;
-      } else if (!(toeA.isPressed() || toeB.isPressed()) && !limitReached){
-        limitReached = true;
-      }
+      // if ((toeA.isPressed() || toeB.isPressed()) && limitReached){
+      //   Llin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+      //   Rlin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+      //   limitReached = false;
+      // } else if (!(toeA.isPressed() || toeB.isPressed()) && !limitReached){
+      //   limitReached = true;
+      // }
       
       if (gamepad2.right_stick_button){
         SAMSMode = true;
@@ -156,27 +163,34 @@ public class StraferOpV3 extends LinearOpMode {
           liftSystem(LRlinSetPos);
           Llin.setPower(1);
           Rlin.setPower(1);
-          armRotation(rotatSetPos);
           extendoGrip(960);
           ankel.setPosition(.567);
           armMovement = false;
           inSetPos = false;
+          pickUpPos = true;
+          barPos = false;
         } else if (gamepad2.dpad_right){
-          armRotation(1550);
+          armRotation(1270);
           extendoGrip(pMUSetPos);
           ankel.setPosition(.567);
           armMovement = true;
           inSetPos = false;
+          pickUpPos = false;
+          barPos = false;
         } else if (gamepad2.dpad_up){
-          armRotation(800);
+          armRotation(760);
           ankel.setPosition(.6);
           armMovement = true;
           inSetPos = false;
+          pickUpPos = false;
+          barPos = true;
         } else if (gamepad2.dpad_left){
-          armRotation(300);
-          ankel.setPosition(.618);
+          armRotation(190);
+          ankel.setPosition(.62);
           armMovement = true;
           inSetPos = false;
+          pickUpPos = false;
+          barPos = true;
         } else if (gamepad2.y){
           liftSystem(800);
           Llin.setPower(1);
@@ -186,6 +200,8 @@ public class StraferOpV3 extends LinearOpMode {
           ankel.setPosition(.567);
           armMovement = false;
           inSetPos = true;
+          pickUpPos = false;
+          barPos = false;
         }
 
         // SO MUCH NESTING I HATE IT
@@ -203,7 +219,7 @@ public class StraferOpV3 extends LinearOpMode {
             Rlin.setPower(0);
           }
 
-          if (!gamepad2.dpad_right){
+          if (barPos){
             if (gamepad2.right_bumper){
               extendoGrip(960);
             } else {
@@ -212,10 +228,18 @@ public class StraferOpV3 extends LinearOpMode {
           }
         }
         
+        if (pickUpPos){
+          if (gamepad2.left_bumper){
+            armRotation(rotatSetPos);
+          } else {
+            armRotation(300);
+          }
+        }
+        
         if (gamepad2.x){
-          imaTouchU.setPosition(.21);
+          imaTouchU.setPosition(.13);
         } else if (gamepad2.b){
-          imaTouchU.setPosition(.55);
+          imaTouchU.setPosition(.52);
         }
         
         
@@ -235,7 +259,7 @@ public class StraferOpV3 extends LinearOpMode {
         // }
       } else if (!SAMSMode){
         if (gamepad2.right_trigger > 0.1){
-          liftSystem(7100);
+          liftSystem(8100);
           Llin.setPower(1);
           Rlin.setPower(1);
         } else if (gamepad2.left_trigger > 0.1){
@@ -268,7 +292,7 @@ public class StraferOpV3 extends LinearOpMode {
         }
         
         if (gamepad2.dpad_up){
-          armRotationMove(1000);
+          armRotationMove(4200);
           rotat.setPower(armSpeed);
         } else if (gamepad2.dpad_down){
           armRotationMove(rotatSetPos);
