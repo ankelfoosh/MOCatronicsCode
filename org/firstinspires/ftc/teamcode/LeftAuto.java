@@ -1,10 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.ColorSensor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -13,12 +12,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.IMU;
 
-
-@Autonomous(name = "BlueLeftAuto", preselectTeleOp = "StraferOpV3")
-public class BlueLeftAuto extends LinearOpMode { 
+@Autonomous(name = "LeftAuto", preselectTeleOp = "StraferOpV3")
+public class LeftAuto extends LinearOpMode { 
   
   private DcMotor Lf;
   private DcMotor Rf;
@@ -235,32 +231,17 @@ public class BlueLeftAuto extends LinearOpMode {
     Rlin.setPower(armSpeed);
   }
   
-  private void CloseClaw() {
-    imaTouchU.setPosition(0.16);
-    sleep(500);
-  }
-    
-  private void OpenClaw() {
-    imaTouchU.setPosition(0.5);
-    sleep(500);
+  private void ClampClaw(double clamp_sp, int sleeptime) {
+    imaTouchU.setPosition(clamp_sp);
+    sleep(sleeptime);
   }
   
-  private void OpenClaw2() {
-    imaTouchU.setPosition(0.6);
-    sleep(500);
+  private void MoveClaw(double claw_sp, int sleeptime) {
+    ankel.setPosition(claw_sp);
+    sleep(sleeptime);
   }
-  
-  private void ClawDown() {
-    ankel.setPosition(.567);
-    sleep(500);
-  }
-  
-  private void ClawUp() {
-    ankel.setPosition(.592);
-    sleep(500);
-  }
-  
-  
+
+
    private void TurnLeft(int turns) {
   imu.resetYaw();
   yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
@@ -334,17 +315,6 @@ public class BlueLeftAuto extends LinearOpMode {
     int minRange;
     int maxRange;
     int armSpeed;
-
- /* IMU.Parameters myIMUparameters;
-  myIMUparameters parameters = new IMU.Parameters(
-  new RevHubOrientationOnRobot (
-          RevHubOrientationOnRobot.LogoFacingDirection.FORWARD,
-          RevHubOrientationOnRobot.UsbFacingDirection.DOWN
-      )
-  ); 
-  parameters.mode               = BNO055IMU.SensorMode.IMU;
-  parameters.angleUnit          = BNO055IMU.AngleUnit.DEGREES;
-  parameters.accelUnit          = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC; */
     
     Rb = hardwareMap.get(DcMotor.class, "Rb");
     Rf = hardwareMap.get(DcMotor.class, "Rf");
@@ -380,37 +350,53 @@ public class BlueLeftAuto extends LinearOpMode {
     
     currentPos = 0;
     turnSpeed = 818;
-    minRange = 10;
-    maxRange = 20;
+    minRange = 9;
+    maxRange = 28;
     imaTouchU.scaleRange(.2, .8);
     ankel.scaleRange(0, 1);
     telemetry.addData("Sensor", Sensor.getDeviceName() );
     telemetry.update();
-     
     
-//    imu.initialize(parameters);
 
     waitForStart();
 
 while (opModeIsActive()) {
     telemetry.addData("Distance (cm)", Sensor.getDistance(DistanceUnit.CM));
     telemetry.update();
-    CloseClaw();
+    ClampClaw(0.16, 0);
     SimulArmUp(1250);
     SlidesUp(4400);
     SimulSlidesUp(2200);
+    MoveClaw(.592, 0);
     Forward(980);
-    ClawUp();
-    OpenClaw();
-    Forward(-500);
+    ClampClaw(.5, 300);
+    sleep(250);
+    Forward(-600);
     TurnRight(1);
-    Left(250);
+    Left(175);
     ArmDown(1200);
-    SlidesDown(6000);
-    Forward(600);
+    SlidesDown(5950);
+    sleep(200);
+    Forward(890);
+    Left(210);
+    ClampClaw(.7, 0);
+    MoveClaw(.567, 0);
     if (Sensor.getDistance(DistanceUnit.CM) > minRange && Sensor.getDistance(DistanceUnit.CM) < maxRange) {
       ArmOut(1000);
-       break;
+      ClampClaw(.16, 200);
+      ArmIn(900);
+      TurnRightC(375);
+      ArmUp(1800);
+      SlidesUp(6600);
+      sleep(200);
+      Forward(-900);
+      sleep(200);
+      MoveClaw(.671, 0);
+      sleep(300);
+      ClampClaw(.6, 0);
+      sleep(300);
+      Forward(300);
+      break;
     } 
       break;
     }
