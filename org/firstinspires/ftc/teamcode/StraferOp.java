@@ -34,7 +34,7 @@ public class StraferOpV3 extends LinearOpMode {
   private double curTime = 0;
   private double nextTime = 0;
   
-  private double RobotSpeed = .42;
+  private double RobotSpeed = .46;
   private double armSpeed = .6;
   private double TurnSpeed = 1.6;
   private boolean bigTurn = false;
@@ -170,9 +170,9 @@ public class StraferOpV3 extends LinearOpMode {
           pickUpPos = true;
           barPos = false;
         } else if (gamepad2.dpad_right){
-          armRotation(1270);
+          armRotation(1590);
           extendoGrip(pMUSetPos);
-          ankel.setPosition(.567);
+          ankel.setPosition(.587);
           armMovement = true;
           inSetPos = false;
           pickUpPos = false;
@@ -207,7 +207,7 @@ public class StraferOpV3 extends LinearOpMode {
         // SO MUCH NESTING I HATE IT
         if (armMovement){
           if (gamepad2.right_trigger > 0.1){
-            liftSystem(7000);
+            liftSystem(7800);
             Llin.setPower(1);
             Rlin.setPower(1);
           } else if (gamepad2.left_trigger > 0.1){
@@ -324,6 +324,13 @@ public class StraferOpV3 extends LinearOpMode {
         }
         telemetry.addData("Yaw", getAngle());
         telemetry.update();
+      }
+      
+      if (gamepad2.a && gamepad2.y){
+        pickMeUp.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Llin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Rlin.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rotat.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
       }
     }
   }
