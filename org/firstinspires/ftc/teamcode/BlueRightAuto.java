@@ -71,7 +71,7 @@ public class BlueRightAuto extends LinearOpMode {
   }
   
   private void WallForward(double dist) {
-    while (sensor.getDistance(DistanceUnit.CM) > dist + 15){
+    while (sensor.getDistance(DistanceUnit.CM) > dist + 10){
       Lb.setPower(-power);
       Lf.setPower(-power);
       Rb.setPower(power);
@@ -82,10 +82,10 @@ public class BlueRightAuto extends LinearOpMode {
     }
     
     while (sensor.getDistance(DistanceUnit.CM) > dist){
-      Lb.setPower(-power * .2);
-      Lf.setPower(-power * .2);
-      Rb.setPower(power * .2);
-      Rf.setPower(power * .2);
+      Lb.setPower(-power * .35);
+      Lf.setPower(-power * .35);
+      Rb.setPower(power * .35);
+      Rf.setPower(power * .35);
     }
     
     Lb.setPower(0);
@@ -135,21 +135,28 @@ public class BlueRightAuto extends LinearOpMode {
   }
   
   private void Right(int _targetPos) {
-    Lb.setTargetPosition(Lb.getCurrentPosition() + _targetPos);
+    imu.resetYaw();
+    yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
+    Lb.setTargetPosition(Lb.getCurrentPosition() + _targetPos - 400);
     Lf.setTargetPosition(Lf.getCurrentPosition() - _targetPos);
-    Rb.setTargetPosition(Rb.getCurrentPosition() + _targetPos);
+    Rb.setTargetPosition(Rb.getCurrentPosition() + _targetPos - 400);
     Rf.setTargetPosition(Rf.getCurrentPosition() - _targetPos);
     Lb.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     Lf.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     Rb.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     Rf.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    Lb.setPower(power);
-    Lf.setPower(power);
-    Rb.setPower(power);
-    Rf.setPower(power);
+    Lb.setPower(power - yeeyaw / 15);
+    Lf.setPower(power + yeeyaw / 15);
+    Rb.setPower(power - yeeyaw / 15);
+    Rf.setPower(power + yeeyaw / 15);
     while (Lb.isBusy()) {
-    telemetry.addData("RbCurrentPosition",Rb.getTargetPosition());
-    telemetry.update();
+      yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
+      Lb.setPower(power - yeeyaw / 15);
+      Lf.setPower(power + yeeyaw / 15);
+      Rb.setPower(power - yeeyaw / 15);
+      Rf.setPower(power + yeeyaw / 15);
+      telemetry.addData("Angle: ", yeeyaw);
+      telemetry.update();
     }
   }
   
@@ -303,39 +310,6 @@ public class BlueRightAuto extends LinearOpMode {
   }
   
   
-  private void TurnLeft(double turns) {
-    imu.resetYaw();
-    yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
-    Lb.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    Lf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    Rb.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    Rf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-  while (yeeyaw < 90 * turns) {
-    yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
-    Lb.setPower(-power * -1.2);
-    Lf.setPower(-power * -1.2);
-    Rb.setPower(-power * -1.2);
-    Rf.setPower(-power * -1.2);
-    telemetry.addLine("fast turn");
-    telemetry.update();
-  }  
-  if (yeeyaw > 90 * turns) {
-    while (yeeyaw > 90 * turns) {
-      yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
-      Lb.setPower(power * -0.4);
-      Lf.setPower(power * -0.4);
-      Rb.setPower(power * -0.4);
-      Rf.setPower(power * -0.4);
-      telemetry.addLine("slow turn");
-      telemetry.update();
-    }
-  }
-    Lb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    Lf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    Rb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    Rf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-  }
-  
   private void TurnRight(double turns) {
     imu.resetYaw();
     yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
@@ -343,31 +317,69 @@ public class BlueRightAuto extends LinearOpMode {
     Lf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     Rb.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     Rf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+  while (yeeyaw > -50 * Math.pow(turns, 1.5)) {
+    yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
+    Lb.setPower(-power * 1.2);
+    Lf.setPower(-power * 1.2);
+    Rb.setPower(-power * 1.2);
+    Rf.setPower(-power * 1.2);
+    telemetry.addLine("fast turn: " + yeeyaw);
+    telemetry.update();
+  }  
+  if (yeeyaw > -90 * turns) {
     while (yeeyaw > -90 * turns) {
       yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
-      Lb.setPower(-power * 1.2);
-      Lf.setPower(-power * 1.2);
-      Rb.setPower(-power * 1.2);
-      Rf.setPower(-power * 1.2);
-      telemetry.addLine("fast turn");
+      Lb.setPower(-power * 0.3);
+      Lf.setPower(-power * 0.3);
+      Rb.setPower(-power * 0.3);
+      Rf.setPower(-power * 0.3);
+      telemetry.addLine("slow turn: " + yeeyaw);
       telemetry.update();
     }
-    if (yeeyaw < -90 * turns) {
-      while (yeeyaw < -90 * turns) {
-        yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
-        Lb.setPower(power * 0.4);
-        Lf.setPower(power * 0.4);
-        Rb.setPower(power * 0.4);
-        Rf.setPower(power * 0.4);
-        telemetry.addLine("slow turn");
-        telemetry.update();
-      }
-    }
+  }
     Lb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     Lf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     Rb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     Rf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    imu.resetYaw();
   }
+  
+  private void TurnLeft(double turns) {
+    imu.resetYaw();
+    yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
+    Lb.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    Lf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    Rb.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    Rf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+  while (yeeyaw < 50 * Math.pow(turns, 1.5)) {
+    yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
+    Lb.setPower(-power * -1.2);
+    Lf.setPower(-power * -1.2);
+    Rb.setPower(-power * -1.2);
+    Rf.setPower(-power * -1.2);
+    telemetry.addLine("fast turn: " + yeeyaw);
+    telemetry.update();
+  }  
+  if (yeeyaw < 90 * turns) {
+    while (yeeyaw < 90 * turns) {
+      yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
+      Lb.setPower(-power * -0.3);
+      Lf.setPower(-power * -0.3);
+      Rb.setPower(-power * -0.3);
+      Rf.setPower(-power * -0.3);
+      telemetry.addLine("slow turn: " + yeeyaw);
+      telemetry.update();
+    }
+  }
+    Lb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    Lf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    Rb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    Rf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    imu.resetYaw();
+  }
+  
+
+
   
    @Override
   public void runOpMode() {
@@ -446,20 +458,21 @@ public class BlueRightAuto extends LinearOpMode {
 
 while (opModeIsActive()) {
     CloseClaw();
-    SimulArmUp(600);
-    SimulSlidesUp(1800);
+    SimulArmUp(640);
+    SimulSlidesUp(2000);
     ClawUp();
-    Forward(1280);
+    Forward(1180);
     ArmOut(1020);
     ArmIn(990);
     OpenClaw();
     sleep(70);
-    Forward(-330);
+    Forward(-320);
     SimulArmDown(520);
     SimulSlidesDown(1370);
-    TurnRight(1.04);
-    Forward(1775);
-    TurnLeft(0.99);
+    Right(2160);
+    //TurnRight(0.98);
+    //Forward(1900);
+    //TurnLeft(1);
     power = 0.2;
     Forward(30);
     power = 0.56;
@@ -468,27 +481,26 @@ while (opModeIsActive()) {
     sleep(600);
     CloseClaw();
     sleep(200);
-    SimulArmUp(170);
+    SimulArmUp(120);
     ArmIn(990);
-    TurnLeft(1.02);
-    TurnLeft(1.02);
+    TurnLeft(1.96);
     ClawSet();
     WallForward(30);
     OpenClaw();
     power = 0.2;
-    Forward(210);
+    Forward(180);
     sleep(600);
     CloseClaw();
     sleep(200);
     power = 0.56;
-    SimulArmUp(330);
+    SimulArmUp(380);
     SimulSlidesUp(1600);
     Forward(-200);
     ClawUp();
-    TurnRight(1.04);
+    TurnRight(1);
     Forward(2100);
-    TurnRight(1.04);
-    Forward(720);
+    TurnRight(1);
+    Forward(640);
     ArmOut(1020);
     ArmIn(990);
     OpenClaw();
@@ -496,10 +508,9 @@ while (opModeIsActive()) {
     Forward(-400);
     SimulArmDown(310);
     SimulSlidesDown(1470);
-    Right(2200);
+    Right(1980);
     
-    TurnLeft(1.02);
-    TurnLeft(1.02);
+    TurnLeft(2);
     ClawSet();
     WallForward(20);
     // sleep(200);
