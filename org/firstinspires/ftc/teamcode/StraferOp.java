@@ -179,7 +179,7 @@ public class StraferOpV3 extends LinearOpMode {
           barPos = false;
         } else if (gamepad2.dpad_up){
           armRotation(760);
-          ankel.setPosition(.6);
+          ankel.setPosition(.658);
           armMovement = true;
           inSetPos = false;
           pickUpPos = false;
@@ -263,7 +263,7 @@ public class StraferOpV3 extends LinearOpMode {
           Llin.setPower(1);
           Rlin.setPower(1);
         } else if (gamepad2.left_trigger > 0.1){
-          liftSystem(LRlinSetPos);
+          liftSystem(-5000);
           Llin.setPower(1);
           Rlin.setPower(1);
         } else {
@@ -273,10 +273,13 @@ public class StraferOpV3 extends LinearOpMode {
       
         if (gamepad2.right_bumper){
           //pickMeUp.setPower(.3);
-          extendoGrip(1020);
+          extendoGripManual(5000);
+          pickMeUp.setPower(.5);
         } else if (gamepad2.left_bumper){
-          //pickMeUp.setPower(-.1);
-          extendoGrip(pMUSetPos);
+          extendoGripManual(-5000);
+          pickMeUp.setPower(.5);
+        } else{
+          pickMeUp.setPower(0);
         }
       
         if (gamepad2.x){
@@ -292,10 +295,10 @@ public class StraferOpV3 extends LinearOpMode {
         }
         
         if (gamepad2.dpad_up){
-          armRotationMove(4200);
+          armRotationMove(5000);
           rotat.setPower(armSpeed);
         } else if (gamepad2.dpad_down){
-          armRotationMove(rotatSetPos);
+          armRotationMove(-5000);
           rotat.setPower(armSpeed);
         } else {
           rotat.setPower(0);
@@ -339,6 +342,11 @@ public class StraferOpV3 extends LinearOpMode {
     pickMeUp.setTargetPosition(pos);
     pickMeUp.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     pickMeUp.setPower(1);
+  }
+  
+  public void extendoGripManual(int pos) {
+    pickMeUp.setTargetPosition(pos);
+    pickMeUp.setMode(DcMotor.RunMode.RUN_TO_POSITION);
   }
   
   public void armRotation(int pos) {
