@@ -99,6 +99,13 @@ public class Odometry extends LinearOpMode {
     Rf.setPower(speed);
   }
 
+  private void turn(int speed) {
+    Lb.setPower(speed);
+    Lf.setPower(-speed);
+    Rb.setPower(speed);
+    Rf.setPower(-speed);
+  }
+  
   /**
    * Describe this function...
    */
@@ -270,21 +277,16 @@ public class Odometry extends LinearOpMode {
     // while the angle is less than min, or the angle is more than max, and the op mode is active
     telemetry2();
     // Returns y position the unit of your choice
-    // Returns y position the unit of your choice
     if (PinpointBlocks.yPosition(DistanceUnit.INCH) < min || PinpointBlocks.yPosition(DistanceUnit.INCH) > max) {
-      // Returns y position the unit of your choice
       // Returns y position the unit of your choice
       while ((PinpointBlocks.yPosition(DistanceUnit.INCH) < min || PinpointBlocks.yPosition(DistanceUnit.INCH) > max) && opModeIsActive()) {
         telemetry2();
         // if the current angle is less than min turn left, when the angle is greater than max, stop
-        // Returns y position the unit of your choice
-        // Returns y position the unit of your choice
         if (PinpointBlocks.yPosition(DistanceUnit.INCH) < min) {
           // Positive is left, negative is right
           // turning with the set speed
           telemetry2();
           strafing((int) tempSpeed);
-          // Returns y position the unit of your choice
           // Returns y position the unit of your choice
           while ((PinpointBlocks.yPosition(DistanceUnit.INCH) < min || PinpointBlocks.yPosition(DistanceUnit.INCH) > max) && opModeIsActive()) {
             telemetry2();
