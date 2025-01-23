@@ -9,19 +9,30 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 
-@Autonomous(name = "Odometry (Blocks to Java)")
+
+@Autonomous(name = "Odometry")
 public class Odometry extends LinearOpMode {
 
   private DcMotor Lb;
   private DcMotor Lf;
   private DcMotor Rb;
   private DcMotor Rf;
+  private DcMotor pickmeup;
+  private DcMotor Llin;
+  private DcMotor Rlin;
+  private DistanceSensor Sensor;
   private IMU imu;
+
+  private Servo imaTouchu;
+  private Servo ankel;
 
   double tempSpeed;
   double max;
   double min;
+  float yeeyaw;
 
   /**
    * Describe this function...
@@ -77,6 +88,16 @@ public class Odometry extends LinearOpMode {
     Lf = hardwareMap.get(DcMotor.class, "Lf");
     Rb = hardwareMap.get(DcMotor.class, "Rb");
     Rf = hardwareMap.get(DcMotor.class, "Rf");
+    Llin = hardwareMap.get(DcMotor.class, "Llin");
+    Rlin = hardwareMap.get(DcMotor.class, "Rlin");
+    rotat = hardwareMap.get(DcMotor.class, "rotat");
+    pickmeup = hardwareMap.get(DcMotor.class, "pickmeup");
+    
+    imaTouchU = hardwareMap.get(Servo.class, "imaTouchU");
+    ankel = hardwareMap.get(Servo.class, "ankel");
+    
+    Sensor = hardwareMap.get(DistanceSensor.class, "Sensor");
+    
     imu = hardwareMap.get(IMU.class, "imu");
 
     initialize();
@@ -259,6 +280,40 @@ public class Odometry extends LinearOpMode {
         tempSpeed = 0.1;
       }
     }
+  }
+
+private void TurnRight(double turns) {
+  imu.resetYaw();
+  yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
+  Lb.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+  Lf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+  Rb.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+  Rf.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    while (yeeyaw > -50 * Math.pow(turns, 1.5)) {
+    yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
+    Lb.setPower(-power * 1.2);
+    Lf.setPower(-power * 1.2);
+    Rb.setPower(-power * 1.2);
+    Rf.setPower(-power * 1.2);
+    telemetry.addLine("fast turn: " + yeeyaw);
+    telemetry.update();
+      }
+      if (yeeyaw > -90 * turns) {
+        while (yeeyaw > -90 * turns) {
+        yeeyaw = imu.getRobotOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES).thirdAngle;
+        Lb.setPower(-power * 0.4);
+        Lf.setPower(-power * 0.4);
+        Rb.setPower(-power * 0.4);
+        Rf.setPower(-power * 0.4);
+        telemetry.addLine("slow turn: " + yeeyaw);
+        telemetry.update();
+      }
+    }
+    Lb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    Lf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    Rb.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    Rf.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    imu.resetYaw();
   }
 
   /**
