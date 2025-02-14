@@ -30,15 +30,20 @@ public class StraferOpV3 extends LinearOpMode {
   private TouchSensor toeB;
   
   private IMU imu;
-  private ElapsedTime timeElapsed = new ElapsedTime();
-  private double curTime = 0;
-  private double nextTime = 0;
+  private ElapsedTime timer = new ElapsedTime();
+  private double doneTime = 0;
+  private boolean timerDone = false;
+  
+  private boolean specPress = false;
+  private boolean specPressB = false;
+  private boolean specPressC = false;
   
   private double RobotSpeed = .46;
   private double armSpeed = .6;
   private double TurnSpeed = 1.6;
   private boolean bigTurn = false;
   private boolean armMovement = false;
+  private boolean extendMove = false;
 
   private boolean inSetPos = true;
   private boolean pickUpPos = false;
@@ -52,8 +57,8 @@ public class StraferOpV3 extends LinearOpMode {
   private boolean SAMSMode = true;
 
   /**
-   * This function is executed when this Op Mode is selected from the Driver Station.
-   */
+    * This function is executed when this Op Mode is selected from the Driver Station.
+    */
   @Override
   public void runOpMode() {
     Lf = hardwareMap.get(DcMotor.class, "Lf");
@@ -149,6 +154,13 @@ public class StraferOpV3 extends LinearOpMode {
       //   limitReached = true;
       // }
       
+      if (timer.milliseconds() >= doneTime){
+        timerDone = true;
+      }
+      else{
+        timerDone = false;
+      }
+      
       if (gamepad2.right_stick_button){
         SAMSMode = true;
       } else if (gamepad2.left_stick_button){
@@ -170,13 +182,15 @@ public class StraferOpV3 extends LinearOpMode {
           pickUpPos = true;
           barPos = false;
         } else if (gamepad2.dpad_right){
-          armRotation(1590);
-          extendoGrip(pMUSetPos);
-          ankel.setPosition(.587);
-          armMovement = true;
+          liftSystem(3200);
+          Llin.setPower(1);
+          Rlin.setPower(1);
+          armRotation(2080);
+          ankel.setPosition(.568);
+          armMovement = false;
           inSetPos = false;
           pickUpPos = false;
-          barPos = false;
+          barPos = true;
         } else if (gamepad2.dpad_up){
           armRotation(760);
           ankel.setPosition(.658);
@@ -202,6 +216,36 @@ public class StraferOpV3 extends LinearOpMode {
           inSetPos = true;
           pickUpPos = false;
           barPos = false;
+        } 
+        
+        if (gamepad2.a){
+          armRotation(190);
+          ankel.setPosition(.626);
+          imaTouchU.setPosition(.52);
+          liftSystem(200);
+          Llin.setPower(1);
+          Rlin.setPower(1);
+          armMovement = false;
+          inSetPos = false;
+          pickUpPos = false;
+          barPos = true;
+          specPress = true;
+        } else if (!gamepad2.a && specPress) {
+          imaTouchU.setPosition(.13);
+          doneTime = 550;
+          timer.reset();
+          timerDone = false;
+          specPressB = true;
+          specPress = false;
+        }
+        
+        if (timerDone && specPressB) {
+          armRotation(760);
+          ankel.setPosition(.658);
+          liftSystem(2000);
+          Llin.setPower(1);
+          Rlin.setPower(1);
+          specPressB = false;
         }
 
         // SO MUCH NESTING I HATE IT
@@ -219,12 +263,14 @@ public class StraferOpV3 extends LinearOpMode {
             Rlin.setPower(0);
           }
 
-          if (barPos){
-            if (gamepad2.right_bumper){
-              extendoGrip(960);
-            } else {
-              extendoGrip(pMUSetPos);
-            }
+          
+        }
+        
+        if (barPos){
+          if (gamepad2.right_bumper){
+            extendoGrip(960);
+          } else {
+            extendoGrip(pMUSetPos);
           }
         }
         
@@ -275,6 +321,7 @@ public class StraferOpV3 extends LinearOpMode {
           //pickMeUp.setPower(.3);
           extendoGripManual(5000);
           pickMeUp.setPower(.5);
+          
         } else if (gamepad2.left_bumper){
           extendoGripManual(-5000);
           pickMeUp.setPower(.5);
